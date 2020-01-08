@@ -1,6 +1,5 @@
 # Implements a digit recognising neural network
 import numpy as np 
-from math import e 
 import random
 
 class Network:
@@ -9,7 +8,7 @@ class Network:
         self.layers = len(params)
         self.biases = [np.random.randn(siz) for siz in params[1:]] # first layer won't have bias 
         #to do check if the param should have a 1 (bias should be a row vector)
-        self.weights = [np.random.randn(siz, prev) for siz, prev in zip(params[1:], parans[:-1])]
+        self.weights = [np.random.randn(siz, prev) for siz, prev in zip(params[1:], params[:-1])]
     
     def gradient_descent(self, training_data, cycles, eta, batch_size, num_batches):
         # group data into batches of batch_size
@@ -49,7 +48,8 @@ class Network:
             a = self.sigmoid(np.dot(weight, a) + bias)
             activations.append(a)
 
-        delta = [2*(a-y)*self.sigmoid_prime()]
+        delta = 2*(activations[-1]-dataset[1])*self.sigmoid_prime(zs[-1])
+        
         
 
 
