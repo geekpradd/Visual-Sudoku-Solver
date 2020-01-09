@@ -1,8 +1,16 @@
 # Implements a digit recognising neural network
+from __future__ import division
+
 import numpy as np 
 import random
 
-class Network:
+LOAD = True
+
+class Network(object):
+    def load(self):
+        self.biases = (np.load("bias.dat", allow_pickle=True)).tolist()
+        self.weights = (np.load("weights.dat", allow_pickle=True)).tolist()
+
     def __init__(self, params):
         # params is a list containing sizes layer wises
         self.layers = len(params)
@@ -10,13 +18,17 @@ class Network:
         #to do check if the param should have a 1 (bias should be a row vector)
         self.weights = [np.random.randn(siz, prev) for siz, prev in zip(params[1:], params[:-1])]
     
-    def gradient_descent(self, training_data, cycles, eta, batch_size, num_batches):
+        if LOAD:
+            self.load()
+    
+    def gradient_descent(self, training_data, cycles, batch_size, eta):
         # group data into batches of batch_size
         # training data has elements that have two numpy arrays: input layer values and output layer values
         # num batches refers to the number of mini batches that will be used in stochastic gradient descent
         # to get better averaging we do this grouping cycles number of times
         n = len(training_data)
         for iter in range(cycles):
+            random.shuffle(training_data)
             mini_batches = [training_data[s:s+batch_size] for s in range(0, n, batch_size)]
 
             count = 0
@@ -25,45 +37,45 @@ class Network:
                        # random.shuffle(training_data)    
                 base_b = [np.zeros(b.shape) for b in self.biases]
                 for dataset in batch:
-                    
                     # do back propagation for this dataset
                     # average out this to obtain the gradient   
-                    change_w, change_b = self.back_prop(dataset)
+                    change_b, change_w = self.back_prop(dataset[0], dataset[1])
                     base_w =  [w + ch for w, ch in zip(base_w, change_w)] 
                     base_b =  [b + ch for b, ch in zip(base_b, change_b)]
                    
                 # we have the average gradient 
-                self.weights = [w-(eta*ch/len(batch)) for w, ch in zip(self.weights, base_w)]
-                self.biases = [b-(eta*ch/len(batch)) for b, ch in zip(self.biases, base_b)]
+                self.weights = [w-((eta/len(batch))*ch) for w, ch in zip(self.weights, base_w)]
+                self.biases = [b-((eta/len(batch))*ch) for b, ch in zip(self.biases, base_b)]
                 count += 1
                 print ("Finished batch {0}".format(count))
+        
+        weight_np = np.array(self.weights)
+        bias_np = np.array(self.biases)
 
-    def test(self, training_data, l, r):
+        weight_np.dump("weights.dat")
+        bias_np.dump("bias.dat")
+
+    def test(self, test_data, l, r):
         i = l
         success = 0
         total = 0
         while i<=r:
-            result = self.forward(training_data[i][0])
+            result = self.forward(test_data[i][0])
             best_val = 0
             best = -1
             j = 0
-            actual = -1
+            actual = test_data[i][1]
             while j<=9:
                 if result[j] > best_val:
-                    best_val = result[i]
+                    best_val = result[j]
                     best = j
-                if training_data[i][1][j] > 0.5:
-                    actual = j
                 j+=1
-
-            for term, actual in zip(result, training_data[i][1]):
-                net_cost += (term-actual)*(term-actual)
-            net_cost /= len(result)
-            
             if actual == best:
                 success+=1
             total += 1
-        
+
+            i+=1
+
         print ("Success: {0}/{1}".format(success, total))
 
     def sigmoid(self, vector):
@@ -79,37 +91,38 @@ class Network:
             a = self.sigmoid(np.dot(weight, a) + bias)   
         return a
 
-    def back_prop(self, dataset):
-        activations = [dataset[0]]
+    def back_prop(self, inp, out):
+        activations = [inp]
         zs = []
-        a = dataset[0]
+        a = inp
         for weight, bias in zip(self.weights, self.biases):
-            # print(bias.shape)
-            zs.append(np.dot(weight, a) + bias)
-            a = self.sigmoid(np.dot(weight, a) + bias)
+            z = np.dot(weight, a) + bias
+            zs.append(z)
+            a = self.sigmoid(z)
             activations.append(a)
 
-        layers = len(self.weights) + 1
-        delta = 2*(activations[-1]-dataset[1])*self.sigmoid_prime(zs[-1])
-        change_bias = self.biases 
-        change_weight = self.weights 
+        layers = self.layers
+        delta = 2*(activations[-1]-out)*self.sigmoid_prime(zs[-1])
+        change_bias = [np.zeros(b.shape) for b in self.biases] 
+        change_weight = [np.zeros(w.shape) for w in self.weights]    
 
-        change_bias[layers-2] = delta 
+        change_bias[-1] = delta 
+        change_weight[-1] = np.dot(delta, activations[-2].transpose())
         # currently operating on weights at layers-2-iter
-        for j in range(len(change_weight[layers-2])):
-            for k in range(len(change_weight[layers-2][j])):
-                change_weight[layers-2][j][k] = activations[layers-2][k]*delta[j]
+        # for j in range(len(change_weight[layers-2])):
+        #     for k in range(len(change_weight[layers-2][j])):
+        #         change_weight[-1][j][k] = activations[-2][k]*delta[j]
 
         # want to return gradients layer wise 
-        for iter in range(layers-3):
-            delta = np.dot(self.weights[layers-2-iter].transpose(), delta)*self.sigmoid_prime(zs[layers-3-iter])        
-            change_bias[layers-3-iter] = delta 
+        for iter in range(2, layers):
+            delta = np.dot(self.weights[-iter + 1].transpose(), delta)*self.sigmoid_prime(zs[-iter])        
+            change_bias[-iter] = delta 
+            change_weight[-iter] = np.dot(delta, activations[-iter-1].transpose())
             # currently operating on weights at layers-2-iter
-            for j in range(len(change_weight[layers-3-iter])):
-                for k in range(len(change_weight[layers-3-iter][j])):
-                    change_weight[layers-3-iter][j][k] = activations[layers-3-iter][k]*delta[j]
+            # for j in range(len(change_weight[-iter])):
+            #     for k in range(len(change_weight[-iter][j])):
+            #         change_weight[-iter][j][k] = activations[-iter-1][k]*delta[j]
             # back propagate delta       
-
-        
-        return change_weight, change_bias
+        return (change_bias, change_weight)
+    
         
