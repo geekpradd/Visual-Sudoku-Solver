@@ -1,9 +1,13 @@
+# Implements a digit recognising neural network
 from __future__ import division
 
 import numpy as np 
 import random
 
-LOAD = True
+
+LOAD = False 
+
+# implement softmax for the last layer
 
 class Network(object):
     def load(self):
@@ -12,6 +16,7 @@ class Network(object):
 
     def __init__(self, params):
         # params is a list containing sizes layer wises
+        self.cc = 0
         self.layers = len(params)
         self.biases = [np.random.randn(siz, 1) for siz in params[1:]] # first layer won't have bias 
         #to do check if the param should have a 1 (bias should be a row vector)
@@ -46,7 +51,7 @@ class Network(object):
                 self.weights = [w-((eta/len(batch))*ch) for w, ch in zip(self.weights, base_w)]
                 self.biases = [b-((eta/len(batch))*ch) for b, ch in zip(self.biases, base_b)]
                 count += 1
-                print ("Finished batch {0}".format(count))
+                # print ("Finished batch {0}".format(count))
         
         weight_np = np.array(self.weights)
         bias_np = np.array(self.biases)
@@ -94,18 +99,28 @@ class Network(object):
         activations = [inp]
         zs = []
         a = inp
+        layer = 1
         for weight, bias in zip(self.weights, self.biases):
             z = np.dot(weight, a) + bias
             zs.append(z)
             a = self.sigmoid(z)
+
+            if layer == self.layers:
+                a = np.array([np.exp(val) for val in z])
+                a /= sum(a)
+                
             activations.append(a)
 
+            layer += 1
+
         layers = self.layers
-        delta = 2*(activations[-1]-out)*self.sigmoid_prime(zs[-1])
+        delta = (activations[-1]-out) # for softmax
         change_bias = [np.zeros(b.shape) for b in self.biases] 
         change_weight = [np.zeros(w.shape) for w in self.weights]    
 
         change_bias[-1] = delta 
+        self.cc += 1
+            
         change_weight[-1] = np.dot(delta, activations[-2].transpose())
 
         # want to return gradients layer wise 
@@ -116,3 +131,4 @@ class Network(object):
                  
         return (change_bias, change_weight)
     
+        

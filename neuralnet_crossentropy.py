@@ -46,7 +46,7 @@ class Network(object):
                 self.weights = [w-((eta/len(batch))*ch) for w, ch in zip(self.weights, base_w)]
                 self.biases = [b-((eta/len(batch))*ch) for b, ch in zip(self.biases, base_b)]
                 count += 1
-                print ("Finished batch {0}".format(count))
+                # print ("Finished batch {0}".format(count))
         
         weight_np = np.array(self.weights)
         bias_np = np.array(self.biases)
@@ -101,7 +101,16 @@ class Network(object):
             activations.append(a)
 
         layers = self.layers
-        delta = 2*(activations[-1]-out)*self.sigmoid_prime(zs[-1])
+        delta = np.ndarray(shape=(10,1))
+        i = 0
+        for activ, digit in zip(activations[-1], out):
+            if digit[0] > 0.5:
+                delta[i][0] = -1.0/activ[0]
+            else:
+                delta[i][0] = 1.0/(1-activ[0])
+            i+=1
+
+        delta = delta*self.sigmoid_prime(zs[-1])
         change_bias = [np.zeros(b.shape) for b in self.biases] 
         change_weight = [np.zeros(w.shape) for w in self.weights]    
 
