@@ -2,13 +2,17 @@ import cv2
 import numpy as np
 #import subprocess
 
-img = cv2.imread('sud3.jpg')
+img = cv2.imread('sud6.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
             cv2.THRESH_BINARY,5,2)
 kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
 erosion = cv2.erode(th, kernel, iterations = 1)
+
+# cv2.imshow('image', erosion)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 maxA = cv2.contourArea(contours[0], True)
@@ -35,10 +39,10 @@ a3 = np.argmax(DIFF)
 a4 = np.argmin(DIFF)
 
 pts1 = np.float32([[X[a2], Y[a2]], [X[a3], Y[a3]], [X[a1], Y[a1]], [X[a4], Y[a4]]])
-pts2 = np.float32([[0,0],[303,0],[303,303],[0,303]])
+pts2 = np.float32([[0,0],[306,0],[306,306],[0,306]])
 
 M = cv2.getPerspectiveTransform(pts1,pts2)
-dst = cv2.warpPerspective(imgray,M,(303,303))
+dst = cv2.warpPerspective(imgray,M,(306,306))
 
 # cv2.drawContours(img, contours, max_i, (0,255,0), 3)
 # cv2.namedWindow('image', cv2.WINDOW_NORMAL)
@@ -46,3 +50,9 @@ dst = cv2.warpPerspective(imgray,M,(303,303))
 cv2.imshow('image', dst)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# digits = np.zeroes(9, 9)
+
+# for i in range(0, 273, 34):
+# 	for j in range(0, 273, 34):
+# 		digits[i][j] = digit_recognizer(dst[i+3:i+32, j+3:j+32])

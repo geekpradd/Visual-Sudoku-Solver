@@ -21,17 +21,17 @@ for i in l_size:
 weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
-#for i in range(0, 10):
-ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('aa.png', 0)), 23, 255, cv2.THRESH_BINARY)
-resized = cv2.resize(img, (28, 28))
+for i in range(1, 10):
+	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY_INV)
+	resized = cv2.resize(img, (28, 28))
 
-# cv2.imshow("image", img)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+	# cv2.imshow("image", img)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
 
-neurons[0] = np.divide(resized[resized > -1], 255.0)
-neurons = feedforward(neurons, weights, biases)
+	neurons[0] = np.divide(resized[resized > -1], 255.0)
+	neurons = feedforward(neurons, weights, biases)
 
-print(np.argmax(neurons[num_layers-1]))
-print(neurons[2])
-print("\n")
+	print(np.argmax(neurons[num_layers-1]))
+	print(neurons[2])
+	print("\n")
