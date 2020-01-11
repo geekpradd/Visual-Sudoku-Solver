@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 #import subprocess
 
-img = cv2.imread('sud.jpg')
+img = cv2.imread('sud2.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\

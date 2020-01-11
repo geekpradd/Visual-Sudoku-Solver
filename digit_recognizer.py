@@ -22,7 +22,7 @@ weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
 #for i in range(0, 10):
-ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('ttt.png', 0)), 23, 255, cv2.THRESH_BINARY_INV)
+ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('n6.png', 0)), 23, 255, cv2.THRESH_BINARY_INV)
 resized = cv2.resize(img, (28, 28))
 
 # cv2.imshow("image", img)
@@ -30,7 +30,7 @@ resized = cv2.resize(img, (28, 28))
 # cv2.destroyAllWindows()
 
 neurons[0] = np.divide(resized[resized > -1], 255.0)
-feedforward(neurons, weights, biases)
+neurons = feedforward(neurons, weights, biases)
 
 print(np.argmax(neurons[num_layers-1]))
 print(neurons[2])
