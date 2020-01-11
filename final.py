@@ -33,6 +33,25 @@ def fillCol(img, i, j, col):
 	img, num4 = fillCol(img, i, j-1, col)
 	return img, 1+num1+num2+num3+num4
 
+def fill_col(img, c_i, c_j, col):
+	# run dfs and fill color
+	stack = [(c_i, c_j)]
+	count = 0
+	while len(stack) != 0:
+		i, j = stack[-1]
+		stack.pop()
+		if i < 0 or i >= img.shape[0] or j < 0 or j >= img.shape[1] or int(img[i][j]) == int(col) or int(img[i][j]) == 0:
+			continue
+		img[i, j] = col
+		stack.append((i+1, j))
+		stack.append((i-1, j))
+		stack.append((i, j+1))
+		stack.append((i, j-1))
+		count+=1
+
+	return img, count
+
+
 def shiftImage(img, i, j) :
 	img2 = np.full(img.shape, 0.0)
 	for a in range(img.shape[0]) :
@@ -44,10 +63,10 @@ def shiftImage(img, i, j) :
 def removeBoundaries(img) :
 	l = img.shape[0]
 	for i in range(l) :
-		img, x = fillCol(img, i, 0, 0)
-		img, x = fillCol(img, 0, i, 0)
-		img, x = fillCol(img, l-i-1, l-1, 0)
-		img, x = fillCol(img, l-1, l-i-1, 0)
+		img, x = fill_col(img, i, 0, 0)
+		img, x = fill_col(img, 0, i, 0)
+		img, x = fill_col(img, l-i-1, l-1, 0)
+		img, x = fill_col(img, l-1, l-i-1, 0)
 	return img
 
 img = cv2.imread('sud2.jpg')
@@ -87,7 +106,14 @@ cl = int(sudL/9)
 sudL = 9 * cl
 
 pts1 = np.float32([[X[a2]+5, Y[a2]+5], [X[a3]-5, Y[a3]+5], [X[a1]-5, Y[a1]-5], [X[a4]+5, Y[a4]-5]])
+<<<<<<< HEAD
 pts2 = np.float32([[0,0],[sudL,0],[sudL,sudL],[0,sudL]])
+=======
+print(pts1)
+pts2 = np.float32([[0,0],[306,0],[306,306],[0,306]])
+>>>>>>> 2c04dd0dc5a27bba767adc534d3254096c230483
+
+
 
 M = cv2.getPerspectiveTransform(pts1,pts2)
 dst = cv2.warpPerspective(imgray,M,(sudL,sudL))
@@ -101,6 +127,9 @@ ret20, img20 = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 # cv2.destroyAllWindows()
 
 digits = np.full((9, 9), 0)
+# cv2.imshow("image", img20)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 for i in range(0, sudL-cl+1, cl):
 	for j in range(0, sudL-cl+1, cl):
@@ -108,12 +137,19 @@ for i in range(0, sudL-cl+1, cl):
 		whites = cell2 == 255
 		zs = np.count_nonzero(whites)
 
-		if zs*100.0/cell2.size > 1 :
+		cv2.imshow("image", cell2)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
 
+<<<<<<< HEAD
 			cell = dst[i+3:i+cl-3, j+3:j+cl-3]
 			# cv2.imshow("image", cell)
 			# cv2.waitKey(0)
 			# cv2.destroyAllWindows()
+=======
+		if zs*100.0/cell2.size > 1 :
+			cell = dst[i+4:i+32, j+3:j+31]
+>>>>>>> 2c04dd0dc5a27bba767adc534d3254096c230483
 			eh = cv2.equalizeHist(cell)
 			th = np.sum(eh)/(eh.size*4)
 			ret, img2 = cv2.threshold(eh, th, 255, cv2.THRESH_BINARY_INV)
@@ -121,20 +157,22 @@ for i in range(0, sudL-cl+1, cl):
 			ar = 0
 			y_m = 0
 			x_m = 0
+
+			
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
 					if img2[y][x] == 255:
-						img2, num = fillCol(img2, y, x, 120)
+						img2, num = fill_col(img2, y, x, 120)
 						if num > ar:
 							ar = num
 							y_m = y
 							x_m = x
 
-			img2, num_ = fillCol(img2, y_m, x_m, 255)
+			img2, num_ = fill_col(img2, y_m, x_m, 255)
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
 					if img2[y][x] == 120:
-						img2, num = fillCol(img2, y, x, 0)
+						img2, num = fill_col(img2, y, x, 0)
 
 			pps = np.nonzero(img2)
 			X_ = pps[1]
@@ -143,6 +181,10 @@ for i in range(0, sudL-cl+1, cl):
 			xm = (np.min(X_) + np.max(X_))/2
 			rows,cols = img2.shape
 			img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2c04dd0dc5a27bba767adc534d3254096c230483
 			cv2.imshow("image", img2)
 			cv2.waitKey(0)
 			cv2.destroyAllWindows()
