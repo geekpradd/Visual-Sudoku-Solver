@@ -10,7 +10,7 @@ l_size = [784, 100, 10]
 num_layers = len(l_size)
 eta = 0.5
 epochs = 10
-lambd = 0.0/60000
+lambd = 5.0/60000
 
 def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))

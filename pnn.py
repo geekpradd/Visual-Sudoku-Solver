@@ -11,7 +11,7 @@ l_size = [784, 100, 10]
 num_layers = len(l_size)
 eta = 0.5
 epochs = 30
-lambd = 5.0/60000
+lambd = 5.0/54000
 
 def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))
@@ -62,11 +62,17 @@ for i in range(1, 10):
 	ar = np.subtract(255, resized[resized > -1])
 	train.append(ar)
 	lab.append(i)
+for i in range(0, 10):
+	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
+	resized = cv2.resize(img, (28, 28))
+	ar = np.subtract(255, resized[resized > -1])
+	train.append(ar)
+	lab.append(i)
 
 mini_batch = 9
 n_of_mb = 6000
 index = []
-for i in range(9):
+for i in range(19):
 	index.append(i)
 
 for p in range(epochs):
@@ -99,14 +105,14 @@ for p in range(epochs):
 			biases[l] = np.subtract(biases[l], bgradSum[l] * eta / mini_batch)
 		
 	crct = 0
-	for i in range(9):
+	for i in range(19):
 		neurons[0] = train[i]
 		feedforward(neurons, weights, biases)
 
 		i_M = np.argmax(neurons[num_layers-1])
 		if i_M == lab[i]:
 			crct += 1
-	print("\nEpoch " + str(p+1) + " : " + str(crct) + "/9")
+	print("\nEpoch " + str(p+1) + " : " + str(crct) + "/19")
 
 	np.savez("weights", weights)
 	np.savez("biases", biases)
