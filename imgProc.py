@@ -2,13 +2,13 @@ import cv2
 import numpy as np
 #import subprocess
 
-img = cv2.imread('sud2.jpg')
+img = cv2.imread('sud3.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
             cv2.THRESH_BINARY,5,2)
 kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
-erosion = cv2.erode(th, kernel, iterations = 4)
+erosion = cv2.erode(th, kernel, iterations = 1)
 
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 maxA = cv2.contourArea(contours[0], True)
