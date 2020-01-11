@@ -108,4 +108,3 @@ for p in range(epochs):
 	np.savez("weights", weights)
 	np.savez("biases", biases)
 
-

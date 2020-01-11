@@ -22,9 +22,26 @@ for i in l_size:
 weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
+def fillCol(img, i, j, col):
+	if i < 0 or i >= img.shape[0] or j < 0 or j >= img.shape[1] or img[i][j] == col or img[i][j] == 0:
+		return img, 0
 
+	img[i][j] = col
+	img, num1 = fillCol(img, i+1, j, col)
+	img, num2 = fillCol(img, i-1, j, col)
+	img, num3 = fillCol(img, i, j+1, col)
+	img, num4 = fillCol(img, i, j-1, col)
+	return img, 1+num1+num2+num3+num4
 
-img = cv2.imread('sud6.jpg')
+def shiftImage(img, i, j) :
+	img2 = np.full(img.shape, 0.0)
+	for a in range(img.shape[0]) :
+		for b in range(img.shape[1]) :
+			if img[a][b] == 255 :
+				img2[a+i][b+j] = 255.0
+	return img2
+
+img = cv2.imread('sud2.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
@@ -56,7 +73,7 @@ a2 = np.argmin(SUM)
 a3 = np.argmax(DIFF)
 a4 = np.argmin(DIFF)
 
-pts1 = np.float32([[X[a2]+3, Y[a2]+3], [X[a3]-3, Y[a3]+3], [X[a1]-3, Y[a1]-3], [X[a4]+3, Y[a4]-3]])
+pts1 = np.float32([[X[a2]+9, Y[a2]+9], [X[a3]-9, Y[a3]+9], [X[a1]-9, Y[a1]-9], [X[a4]+9, Y[a4]-9]])
 pts2 = np.float32([[0,0],[306,0],[306,306],[0,306]])
 
 M = cv2.getPerspectiveTransform(pts1,pts2)
@@ -67,7 +84,34 @@ digits = np.full((9, 9), 0)
 for i in range(0, 273, 34):
 	for j in range(0, 273, 34):
 		cell = dst[i+3:i+31, j+3:j+31]
-		ret, img2 = cv2.threshold(cv2.equalizeHist(cell), 23, 255, cv2.THRESH_BINARY_INV)
+		ret, img2 = cv2.threshold(cv2.equalizeHist(cell), 35, 255, cv2.THRESH_BINARY_INV)
+		ar = 0
+		y_m = 0
+		x_m = 0
+		for y in range(img2.shape[0]):
+			for x in range(img2.shape[1]):
+				if img2[y][x] == 255:
+					img2, num = fillCol(img2, y, x, 120)
+					if num > ar:
+						ar = num
+						y_m = y
+						x_m = x
+		img2, num_ = fillCol(img2, y_m, x_m, 255)
+		for y in range(img2.shape[0]):
+			for x in range(img2.shape[1]):
+				if img2[y][x] == 120:
+					img2, num = fillCol(img2, y, x, 0)
+
+		pps = np.nonzero(img2)
+		X_ = pps[1]
+		Y_ = pps[0]
+		ym = (np.min(Y_) + np.max(Y_))/2
+		xm = (np.min(X_) + np.max(X_))/2
+		rows,cols = img2.shape
+		img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
+		# M = np.float32([[1,0,cols/2-xm],[0,1,rows/2-ym]])
+		# img2 = cv2.warpAffine(img2, M, (cols, rows))
+		# ret, img2 = cv2.threshold(img2, 120, 255, cv2.THRESH_BINARY)
 		# cv2.imshow("image", img2)
 		# cv2.waitKey(0)
 		# cv2.destroyAllWindows()
