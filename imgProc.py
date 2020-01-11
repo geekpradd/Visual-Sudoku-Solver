@@ -6,7 +6,7 @@ img = cv2.imread('sud.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 edges = cv2.Canny(imgray,100,200)
 lines = cv2.HoughLines(edges,1,np.pi/180, 150) 
-print(lines)
+#print(lines)
   
 # The below for loop runs till r and theta values  
 # are in the range of the 2d array
