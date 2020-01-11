@@ -148,8 +148,8 @@ for i in range(0, sudL-cl+1, cl):
 			cv2.destroyAllWindows()
 			neurons[0] = np.divide(img2[img2 > -1], 255.0)
 			neurons = feedforward(neurons, weights, biases)
-			digits[int(i/34)][int(j/34)] = np.argmax(neurons[num_layers-1])
+			digits[int(i/cl)][int(j/cl)] = np.argmax(neurons[num_layers-1])
 		else :
-			digits[int(i/34)][int(j/34)] = 0
+			digits[int(i/cl)][int(j/cl)] = 0
 
 print(digits)
