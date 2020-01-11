@@ -57,7 +57,7 @@ def removeBoundaries(img) :
 		img, x = fillCol(img, l-1, l-i-1, 0)
 	return img
 
-img = cv2.imread('sud2.jpg')
+img = cv2.imread('sud.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
@@ -117,13 +117,15 @@ for i in range(0, sudL-cl+1, cl):
 
 		if zs*100.0/cell2.size > 1 :
 
-			cell = dst[i+3:i+cl-3, j+3:j+cl-3]
+			pad = int(cl*0.12)
+
+			cell = dst[i+pad:i+cl-pad, j+pad:j+cl-pad]
 			# cv2.imshow("image", cell)
 			# cv2.waitKey(0)
 			# cv2.destroyAllWindows()
 			eh = cv2.equalizeHist(cell)
-			th = np.sum(eh)/(eh.size*4)
-			ret, img2 = cv2.threshold(eh, th, 255, cv2.THRESH_BINARY_INV)
+			#th = np.sum(eh)/(eh.size*4)
+			ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
 			img2 = cv2.resize(img2, (28, 28))
 			ar = 0
 			y_m = 0
@@ -143,6 +145,7 @@ for i in range(0, sudL-cl+1, cl):
 					if img2[y][x] == 120:
 						img2, num = fillCol(img2, y, x, 0)
 
+			ret, img2 = cv2.threshold(img2, 200, 255, cv2.THRESH_BINARY)
 			pps = np.nonzero(img2)
 			X_ = pps[1]
 			Y_ = pps[0]
@@ -150,9 +153,9 @@ for i in range(0, sudL-cl+1, cl):
 			xm = (np.min(X_) + np.max(X_))/2
 			rows,cols = img2.shape
 			img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
-			cv2.imshow("image", img2)
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
+			# cv2.imshow("image", img2)
+			# cv2.waitKey(0)
+			# cv2.destroyAllWindows()
 			neurons[0] = np.divide(img2[img2 > -1], 255.0)
 			neurons = feedforward(neurons, weights, biases)
 			digits[int(i/cl)][int(j/cl)] = np.argmax(neurons[num_layers-1])
