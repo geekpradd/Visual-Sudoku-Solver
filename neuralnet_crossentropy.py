@@ -3,7 +3,9 @@ from __future__ import division
 import numpy as np 
 import random
 
-LOAD = True
+LOAD = False
+
+# add L2 regularization
 
 class Network(object):
     def load(self):
@@ -20,7 +22,7 @@ class Network(object):
         if LOAD:
             self.load()
     
-    def gradient_descent(self, training_data, cycles, batch_size, eta):
+    def gradient_descent(self, training_data, cycles, batch_size, eta, lmbda):
         # group data into batches of batch_size
         # training data has elements that have two numpy arrays: input layer values and output layer values
         # num batches refers to the number of mini batches that will be used in stochastic gradient descent
@@ -39,14 +41,16 @@ class Network(object):
                     # do back propagation for this dataset
                     # average out this to obtain the gradient   
                     change_b, change_w = self.back_prop(dataset[0], dataset[1])
-                    base_w =  [w + ch for w, ch in zip(base_w, change_w)] 
+                    base_w =  [w + ch  for w, ch in zip(base_w, change_w)] 
                     base_b =  [b + ch for b, ch in zip(base_b, change_b)]
                    
                 # we have the average gradient 
-                self.weights = [w-((eta/len(batch))*ch) for w, ch in zip(self.weights, base_w)]
+                self.weights = [(1-eta*lmbda/len(batch))*w-((eta/len(batch))*ch) for w, ch in zip(self.weights, base_w)]
                 self.biases = [b-((eta/len(batch))*ch) for b, ch in zip(self.biases, base_b)]
                 count += 1
                 # print ("Finished batch {0}".format(count))
+
+            print ("Finished epoch " + str(iter+1))
         
         weight_np = np.array(self.weights)
         bias_np = np.array(self.biases)
@@ -101,16 +105,8 @@ class Network(object):
             activations.append(a)
 
         layers = self.layers
-        delta = np.ndarray(shape=(10,1))
-        i = 0
-        for activ, digit in zip(activations[-1], out):
-            if digit[0] > 0.5:
-                delta[i][0] = -1.0/activ[0]
-            else:
-                delta[i][0] = 1.0/(1-activ[0])
-            i+=1
 
-        delta = delta*self.sigmoid_prime(zs[-1])
+        delta = activations[-1] - out
         change_bias = [np.zeros(b.shape) for b in self.biases] 
         change_weight = [np.zeros(w.shape) for w in self.weights]    
 
