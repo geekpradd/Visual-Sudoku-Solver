@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
-from mlxtend.data import loadlocal_mnist
+# from mlxtend.data import loadlocal_mnist
 import random
+
+from gen_train import get_stretched
 
 neurons = []
 deltas = []
@@ -11,7 +13,7 @@ l_size = [784, 100, 10]
 num_layers = len(l_size)
 eta = 0.5
 epochs = 30
-lambd = 5.0/54000
+lambd = 0
 
 def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))
@@ -57,22 +59,49 @@ train = []
 lab = []
 
 for i in range(1, 10):
-	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
+	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 20, 255, cv2.THRESH_BINARY)
 	resized = cv2.resize(img, (28, 28))
-	ar = np.subtract(255, resized[resized > -1])
+	ar = np.subtract(255, resized)
+	im = cv2.imread('digits/q'+str(i)+'.jpg')
+	# print(ar)
+	i1 = cv2.resize(get_stretched(im, 1, 2), (28, 28), cv2.INTER_LINEAR)
+	i2 = cv2.resize(get_stretched(im, 1, 3), (28, 28), cv2.INTER_LINEAR)
+	i3 = cv2.resize(get_stretched(im, 1, 4), (28, 28), cv2.INTER_LINEAR)
+	i4 = cv2.resize(get_stretched(im, 2, 3), (28, 28), cv2.INTER_LINEAR)
+	# cv2.imshow("image", i3)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
+
+	ar = ar[ar > -1]
+	i1 = i1[i1 > -1]
+	i2 = i2[i2 > -1]
+	i3 = i3[i3 > -1]
+	i4 = i4[i4 > -1]
+	
 	train.append(ar)
+	train.append(i1)
+	train.append(i2)
+	train.append(i3)
+	train.append(i4)
+
 	lab.append(i)
-for i in range(0, 10):
-	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
-	resized = cv2.resize(img, (28, 28))
-	ar = np.subtract(255, resized[resized > -1])
-	train.append(ar)
+	lab.append(i)
+	lab.append(i)
+	lab.append(i)
 	lab.append(i)
 
+print (len(train))
+# for i in range(0, 10):
+# 	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
+# 	resized = cv2.resize(img, (28, 28))
+# 	ar = np.subtract(255, resized[resized > -1])
+# 	train.append(ar)
+# 	lab.append(i)
+
 mini_batch = 9
-n_of_mb = 6000
+n_of_mb = 1200
 index = []
-for i in range(19):
+for i in range(45):
 	index.append(i)
 
 for p in range(epochs):
@@ -105,7 +134,7 @@ for p in range(epochs):
 			biases[l] = np.subtract(biases[l], bgradSum[l] * eta / mini_batch)
 		
 	crct = 0
-	for i in range(19):
+	for i in range(45):
 		neurons[0] = train[i]
 		feedforward(neurons, weights, biases)
 
