@@ -25,7 +25,7 @@ for i in range(1, 10):
 	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY_INV)
 	resized = cv2.resize(img, (28, 28))
 
-	# cv2.imshow("image", img)
+	# cv2.imshow("image", resized)
 	# cv2.waitKey(0)
 	# cv2.destroyAllWindows()
 
