@@ -22,18 +22,7 @@ for i in l_size:
 weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
-def fillCol(img, i, j, col):
-	if i < 0 or i >= img.shape[0] or j < 0 or j >= img.shape[1] or int(img[i][j]) == int(col) or int(img[i][j]) == 0:
-		return img, 0
-
-	img[i][j] = col
-	img, num1 = fillCol(img, i+1, j, col)
-	img, num2 = fillCol(img, i-1, j, col)
-	img, num3 = fillCol(img, i, j+1, col)
-	img, num4 = fillCol(img, i, j-1, col)
-	return img, 1+num1+num2+num3+num4
-
-def fill_col(img, c_i, c_j, col):
+def fillCol(img, c_i, c_j, col):
 	# run dfs and fill color
 	stack = [(c_i, c_j)]
 	count = 0
@@ -51,7 +40,6 @@ def fill_col(img, c_i, c_j, col):
 
 	return img, count
 
-
 def shiftImage(img, i, j) :
 	img2 = np.full(img.shape, 0.0)
 	for a in range(img.shape[0]) :
@@ -63,13 +51,13 @@ def shiftImage(img, i, j) :
 def removeBoundaries(img) :
 	l = img.shape[0]
 	for i in range(l) :
-		img, x = fill_col(img, i, 0, 0)
-		img, x = fill_col(img, 0, i, 0)
-		img, x = fill_col(img, l-i-1, l-1, 0)
-		img, x = fill_col(img, l-1, l-i-1, 0)
+		img, x = fillCol(img, i, 0, 0)
+		img, x = fillCol(img, 0, i, 0)
+		img, x = fillCol(img, l-i-1, l-1, 0)
+		img, x = fillCol(img, l-1, l-i-1, 0)
 	return img
 
-img = cv2.imread('sud5.jpg')
+img = cv2.imread('sud2.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
@@ -101,58 +89,59 @@ a2 = np.argmin(SUM)
 a3 = np.argmax(DIFF)
 a4 = np.argmin(DIFF)
 
+sudL = int((X[a3] - X[a2] + X[a1] - X[a4] + Y[a1] - Y[a3] + Y[a4] - Y[a2] - 40)/2)
+cl = int(sudL/9)
+sudL = 9 * cl
+
 pts1 = np.float32([[X[a2]+5, Y[a2]+5], [X[a3]-5, Y[a3]+5], [X[a1]-5, Y[a1]-5], [X[a4]+5, Y[a4]-5]])
-print(pts1)
-pts2 = np.float32([[0,0],[306,0],[306,306],[0,306]])
-
-
+pts2 = np.float32([[0,0],[sudL,0],[sudL,sudL],[0,sudL]])
 
 M = cv2.getPerspectiveTransform(pts1,pts2)
-dst = cv2.warpPerspective(imgray,M,(306,306))
+dst = cv2.warpPerspective(imgray,M,(sudL,sudL))
 
 eh_ = cv2.equalizeHist(dst)
 th_ = np.sum(eh_)/(eh_.size*4)
 ret20, img20 = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 
-digits = np.full((9, 9), 0)
-# cv2.imshow("image", img20)
+# cv2.imshow('image', img20)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
 
-for i in range(0, 273, 34):
-	for j in range(0, 273, 34):
-		cell2 = removeBoundaries(img20[i:i+34, j:j+34])
+digits = np.full((9, 9), 0)
+
+for i in range(0, sudL-cl+1, cl):
+	for j in range(0, sudL-cl+1, cl):
+		cell2 = removeBoundaries(img20[i:i+cl, j:j+cl])
 		whites = cell2 == 255
 		zs = np.count_nonzero(whites)
 
-		cv2.imshow("image", cell2)
-		cv2.waitKey(0)
-		cv2.destroyAllWindows()
-
 		if zs*100.0/cell2.size > 1 :
-			cell = dst[i+4:i+32, j+3:j+31]
+
+			cell = dst[i+3:i+cl-3, j+3:j+cl-3]
+			# cv2.imshow("image", cell)
+			# cv2.waitKey(0)
+			# cv2.destroyAllWindows()
 			eh = cv2.equalizeHist(cell)
 			th = np.sum(eh)/(eh.size*4)
 			ret, img2 = cv2.threshold(eh, th, 255, cv2.THRESH_BINARY_INV)
+			img2 = cv2.resize(img2, (28, 28))
 			ar = 0
 			y_m = 0
 			x_m = 0
-
-			
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
 					if img2[y][x] == 255:
-						img2, num = fill_col(img2, y, x, 120)
+						img2, num = fillCol(img2, y, x, 120)
 						if num > ar:
 							ar = num
 							y_m = y
 							x_m = x
 
-			img2, num_ = fill_col(img2, y_m, x_m, 255)
+			img2, num_ = fillCol(img2, y_m, x_m, 255)
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
 					if img2[y][x] == 120:
-						img2, num = fill_col(img2, y, x, 0)
+						img2, num = fillCol(img2, y, x, 0)
 
 			pps = np.nonzero(img2)
 			X_ = pps[1]
@@ -161,14 +150,13 @@ for i in range(0, 273, 34):
 			xm = (np.min(X_) + np.max(X_))/2
 			rows,cols = img2.shape
 			img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
-
 			cv2.imshow("image", img2)
 			cv2.waitKey(0)
 			cv2.destroyAllWindows()
 			neurons[0] = np.divide(img2[img2 > -1], 255.0)
 			neurons = feedforward(neurons, weights, biases)
-			digits[int(i/34)][int(j/34)] = np.argmax(neurons[num_layers-1])
+			digits[int(i/cl)][int(j/cl)] = np.argmax(neurons[num_layers-1])
 		else :
-			digits[int(i/34)][int(j/34)] = 0
+			digits[int(i/cl)][int(j/cl)] = 0
 
 print(digits)
