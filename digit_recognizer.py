@@ -22,7 +22,7 @@ weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
 for i in range(1, 10):
-	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
+	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
 	resized = cv2.resize(img, (28, 28))
 
 	# cv2.imshow("image", img)

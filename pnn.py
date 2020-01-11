@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from mlxtend.data import loadlocal_mnist
 import random
 
@@ -9,8 +10,8 @@ weights = []
 l_size = [784, 100, 10]
 num_layers = len(l_size)
 eta = 0.5
-epochs = 10
-lambd = 0.0/60000
+epochs = 30
+lambd = 5.0/60000
 
 def sigmoid(z):
 	return 1.0/(1.0+np.exp(-z))
@@ -52,18 +53,20 @@ for i in l_size:
 weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
-train, lab = loadlocal_mnist(
-        images_path='train-images-idx3-ubyte', 
-        labels_path='train-labels-idx1-ubyte')
+train = []
+lab = []
 
-test, lab2 = loadlocal_mnist(
-        images_path='t10k-images-idx3-ubyte', 
-        labels_path='t10k-labels-idx1-ubyte')
+for i in range(1, 10):
+	ret, img = cv2.threshold(cv2.equalizeHist(cv2.imread('digits/p'+str(i)+'.jpg', 0)), 23, 255, cv2.THRESH_BINARY)
+	resized = cv2.resize(img, (28, 28))
+	ar = np.subtract(255, resized[resized > -1])
+	train.append(ar)
+	lab.append(i)
 
-mini_batch = 10
-n_of_mb = int(60000/mini_batch)
+mini_batch = 9
+n_of_mb = 6000
 index = []
-for i in range(60000):
+for i in range(9):
 	index.append(i)
 
 for p in range(epochs):
@@ -78,11 +81,11 @@ for p in range(epochs):
 				wgradSum.append(np.full((l_size[l], l_size[l-1]), 0.0))
 
 		for j in range(mini_batch):
-			neurons[0] = train[index[i*mini_batch + j]]/255.0
+			neurons[0] = train[index[j]]/255.0
 			neurons = feedforward(neurons, weights, biases)
 
 			y = np.full(10, 0)
-			y[lab[index[i*mini_batch + j]]] = 1
+			y[lab[index[j]]] = 1
 			for level in range(num_layers) :
 				deltas = backprop(neurons, weights, y, deltas, num_layers-1-level)
 
@@ -96,16 +99,14 @@ for p in range(epochs):
 			biases[l] = np.subtract(biases[l], bgradSum[l] * eta / mini_batch)
 		
 	crct = 0
-	for i in range(10000):
-		neurons[0] = test[i]
+	for i in range(9):
+		neurons[0] = train[i]
 		feedforward(neurons, weights, biases)
 
 		i_M = np.argmax(neurons[num_layers-1])
-		if i_M == lab2[i]:
+		if i_M == lab[i]:
 			crct += 1
-	print("\nEpoch " + str(p+1) + " : " + str(crct) + "/10000")
+	print("\nEpoch " + str(p+1) + " : " + str(crct) + "/9")
 
 	np.savez("weights", weights)
 	np.savez("biases", biases)
-
-
