@@ -5,7 +5,7 @@ import numpy as np
 neurons = []
 biases = []
 weights = []
-l_size = [784, 100, 10]
+l_size = [2500, 100, 100, 10]
 num_layers = len(l_size)
 
 def sigmoid(z):
@@ -19,8 +19,8 @@ def feedforward(neurons, weights, biases):
 for i in l_size:
 	neurons.append(np.full(i, 0.0))
 
-weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
-biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
+weights = np.load("weights2.npz", allow_pickle=True)["arr_0"]
+biases = np.load("biases2.npz", allow_pickle=True)["arr_0"]
 
 def fillCol(img, c_i, c_j, col, curCol):
 	# run dfs and fill color
@@ -57,7 +57,7 @@ def removeBoundaries(img) :
 		img, x = fillCol(img, l-1, l-i-1, 0, 255)
 	return img
 
-img = cv2.imread('sud.jpg')
+img = cv2.imread('sud6.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
@@ -109,8 +109,8 @@ ret20, img20 = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 
 digits = np.full((9, 9), 0)
 
-for i in range(1*cl, sudL-cl+1, cl):
-	for j in range(7*cl, sudL-cl+1, cl):
+for i in range(0*cl, sudL-cl+1, cl):
+	for j in range(0*cl, sudL-cl+1, cl):
 		cell2 = removeBoundaries(img20[i:i+cl, j:j+cl])
 		whites = cell2 == 255
 		zs = np.count_nonzero(whites)
@@ -126,7 +126,7 @@ for i in range(1*cl, sudL-cl+1, cl):
 			eh = cv2.equalizeHist(cell)
 			#th = np.sum(eh)/(eh.size*4)
 			ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
-			img2 = cv2.resize(img2, (28, 28))
+			img2 = cv2.resize(img2, (50, 50))
 			# cv2.imshow("image", img2)
 			# cv2.waitKey(0)
 			# cv2.destroyAllWindows()
@@ -161,7 +161,7 @@ for i in range(1*cl, sudL-cl+1, cl):
 			# cv2.destroyAllWindows()
 			neurons[0] = np.divide(img2[img2 > -1], 255.0)
 			neurons = feedforward(neurons, weights, biases)
-			# print(neurons[2])
+			# print(neurons[3])
 			# cv2.imshow("image", img2)
 			# cv2.waitKey(0)
 			# cv2.destroyAllWindows()
