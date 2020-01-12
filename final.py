@@ -22,14 +22,14 @@ for i in l_size:
 weights = np.load("weights.npz", allow_pickle=True)["arr_0"]
 biases = np.load("biases.npz", allow_pickle=True)["arr_0"]
 
-def fillCol(img, c_i, c_j, col):
+def fillCol(img, c_i, c_j, col, curCol):
 	# run dfs and fill color
 	stack = [(c_i, c_j)]
 	count = 0
 	while len(stack) != 0:
 		i, j = stack[-1]
 		stack.pop()
-		if i < 0 or i >= img.shape[0] or j < 0 or j >= img.shape[1] or int(img[i][j]) == int(col) or int(img[i][j]) == 0:
+		if i < 0 or i >= img.shape[0] or j < 0 or j >= img.shape[1] or int(img[i][j]) == int(col) or int(img[i][j]) != curCol:
 			continue
 		img[i, j] = col
 		stack.append((i+1, j))
@@ -40,24 +40,24 @@ def fillCol(img, c_i, c_j, col):
 
 	return img, count
 
-def shiftImage(img, i, j) :
-	img2 = np.full(img.shape, 0.0)
-	for a in range(img.shape[0]) :
-		for b in range(img.shape[1]) :
-			if img[a][b] == 255 :
-				img2[a+i][b+j] = 255.0
-	return img2
+def shiftImage(img5, i, j) :
+	img6 = np.zeros(img5.shape, np.uint8)
+	for a in range(img5.shape[0]) :
+		for b in range(img5.shape[1]) :
+			if img5[a][b] != 0 and a+i>0 and b+j>0 and a+i<img5.shape[0] and b+j<img5.shape[1] :
+				img6[a+i][b+j] = img5[a][b]
+	return img6
 
 def removeBoundaries(img) :
 	l = img.shape[0]
 	for i in range(l) :
-		img, x = fillCol(img, i, 0, 0)
-		img, x = fillCol(img, 0, i, 0)
-		img, x = fillCol(img, l-i-1, l-1, 0)
-		img, x = fillCol(img, l-1, l-i-1, 0)
+		img, x = fillCol(img, i, 0, 0, 255)
+		img, x = fillCol(img, 0, i, 0, 255)
+		img, x = fillCol(img, l-i-1, l-1, 0, 255)
+		img, x = fillCol(img, l-1, l-i-1, 0, 255)
 	return img
 
-img = cv2.imread('sud.jpg')
+img = cv2.imread('sud3.jpg')
 imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blur = cv2.GaussianBlur(imgray, (11, 11), 0)
 th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
@@ -109,8 +109,8 @@ ret20, img20 = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 
 digits = np.full((9, 9), 0)
 
-for i in range(0, sudL-cl+1, cl):
-	for j in range(0, sudL-cl+1, cl):
+for i in range(8*cl, sudL-cl+1, cl):
+	for j in range(6*cl, sudL-cl+1, cl):
 		cell2 = removeBoundaries(img20[i:i+cl, j:j+cl])
 		whites = cell2 == 255
 		zs = np.count_nonzero(whites)
@@ -127,26 +127,29 @@ for i in range(0, sudL-cl+1, cl):
 			#th = np.sum(eh)/(eh.size*4)
 			ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
 			img2 = cv2.resize(img2, (28, 28))
+			# cv2.imshow("image", img2)
+			# cv2.waitKey(0)
+			# cv2.destroyAllWindows()
 			ar = 0
 			y_m = 0
 			x_m = 0
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
 					if img2[y][x] == 255:
-						img2, num = fillCol(img2, y, x, 120)
+						img2, num = fillCol(img2, y, x, 17, 255)
 						if num > ar:
 							ar = num
 							y_m = y
 							x_m = x
 
-			img2, num_ = fillCol(img2, y_m, x_m, 255)
+			img2, num_ = fillCol(img2, y_m, x_m, 255, 17)
 			for y in range(img2.shape[0]):
 				for x in range(img2.shape[1]):
-					if img2[y][x] == 120:
-						img2, num = fillCol(img2, y, x, 0)
+					if img2[y][x] == 17:
+						img2, num = fillCol(img2, y, x, 0, 17)
 
-			ret, img2 = cv2.threshold(img2, 200, 255, cv2.THRESH_BINARY)
-			pps = np.nonzero(img2)
+			ret, img3 = cv2.threshold(img2, 200, 255, cv2.THRESH_BINARY)
+			pps = np.nonzero(img3)
 			X_ = pps[1]
 			Y_ = pps[0]
 			ym = (np.min(Y_) + np.max(Y_))/2
