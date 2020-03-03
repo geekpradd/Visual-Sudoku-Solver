@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from get_digit import recognize
+
 def fillCol(img, c_i, c_j, col, curCol):
 	# run dfs and fill color
 	stack = [(c_i, c_j)]
@@ -83,6 +85,7 @@ def get_img(src):
 
     eh_ = cv2.equalizeHist(dst)
     th_ = np.sum(eh_)/(eh_.size*4)
+    
     ret20, img_final = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 
     img_final = cv2.resize(img_final, (720, 720))
@@ -96,11 +99,13 @@ def get_matrix(src):
     sudL, height = image.shape 
     cl = sudL//9
 
-    for i in range(1*cl, sudL-cl+1, cl):
-        for j in range(7*cl, sudL-cl+1, cl):
+    count = 0
+    for i in range(0, sudL-cl+1, cl):
+        for j in range(0, sudL-cl+1, cl):
             cell2 = removeBoundaries(copy[i:i+cl, j:j+cl])
             whites = cell2 == 255
             zs = np.count_nonzero(whites)
+            count += 1
 
             if zs*100.0/cell2.size > 1 :
 
@@ -110,7 +115,7 @@ def get_matrix(src):
                 
                 eh = cv2.equalizeHist(cell)
                 #th = np.sum(eh)/(eh.size*4)
-                ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
+                ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY)
                 img2 = cv2.resize(img2, (28, 28))
                 # cv2.imshow("image", img2)
                 # cv2.waitKey(0)
@@ -141,23 +146,79 @@ def get_matrix(src):
                 xm = (np.min(X_) + np.max(X_))/2
                 rows,cols = img2.shape
                 img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
-                # cv2.imshow("image", img2)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
+                
+                
+                result_array = recognize(img2)
+                val = np.argmax(result_array)
+                print (val)
+                cv2.imshow("image", img2)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
                 # neurons[0] = np.divide(img2[img2 > -1], 255.0)
                 # neurons = feedforward(neurons, weights, biases)
                 # # print(neurons[2])
                 # # cv2.imshow("image", img2)
                 # # cv2.waitKey(0)
                 # # cv2.destroyAllWindows()
-                # digits[int(i/cl)][int(j/cl)] = np.argmax(neurons[num_layers-1])
+                digits[int(i/cl)][int(j/cl)] = val
             else :
-                digits[int(i/cl)][int(j/cl)] = 0
+                digits[int(i/cl)][int(j/cl)] = -1
+    return digits
+
+
+def test(src):
+    digits = np.full((9, 9), 0)
+    cell = cv2.imread(src)
+    cell = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
+    eh = cv2.equalizeHist(cell)
+    #th = np.sum(eh)/(eh.size*4)
+    ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
+    img2 = cv2.resize(img2, (28, 28))
+    
+    # ar = 0
+    # y_m = 0
+    # x_m = 0
+    # for y in range(img2.shape[0]):
+    #     for x in range(img2.shape[1]):
+    #         if img2[y][x] == 255:
+    #             img2, num = fillCol(img2, y, x, 17, 255)
+    #             if num > ar:
+    #                 ar = num
+    #                 y_m = y
+    #                 x_m = x
+
+    # img2, num_ = fillCol(img2, y_m, x_m, 255, 17)
+    # for y in range(img2.shape[0]):
+    #     for x in range(img2.shape[1]):
+    #         if img2[y][x] == 17:
+    #             img2, num = fillCol(img2, y, x, 0, 17)
+
+    # ret, img3 = cv2.threshold(img2, 200, 255, cv2.THRESH_BINARY)
+    # pps = np.nonzero(img3)
+    # X_ = pps[1]
+    # Y_ = pps[0]
+    # ym = (np.min(Y_) + np.max(Y_))/2
+    # xm = (np.min(X_) + np.max(X_))/2
+    # rows,cols = img2.shape
+    # img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
+    
+    
+    result_array = recognize(img2)
+    val = np.argmax(result_array)
+    print (val)
+    cv2.imshow("image", img2)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    # neurons[0] = np.divide(img2[img2 > -1], 255.0)
+    # neurons = feedforward(neurons, weights, biases)
+    # # print(neurons[digits[int(i/cl)][int(j/cl)] = val2])
+    # # cv2.imshow("image", img2)
+    # # cv2.waitKey(0)
+    # # cv2.destroyAllWindows()
+    return val
+
 
 
 if __name__ == "__main__":
-    image = get_img("sud6.jpg")
-    get_matrix("sud.jpg")
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    print(get_matrix("sud.jpg"))
+    

@@ -103,9 +103,10 @@ eh_ = cv2.equalizeHist(dst)
 th_ = np.sum(eh_)/(eh_.size*4)
 ret20, img20 = cv2.threshold(eh_, th_, 255, cv2.THRESH_BINARY_INV)
 
-# cv2.imshow('image', img20)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+img20 = cv2.resize(img20, (800, 800))
+cv2.imshow('image', img20)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 digits = np.full((9, 9), 0)
 
@@ -120,9 +121,9 @@ for i in range(1*cl, sudL-cl+1, cl):
 			pad = int(cl*0.12)
 
 			cell = dst[i+pad:i+cl-pad, j+pad:j+cl-pad]
-			# cv2.imshow("image", cell)
-			# cv2.waitKey(0)
-			# cv2.destroyAllWindows()
+			cv2.imshow("image", cell)
+			cv2.waitKey(0)
+			cv2.destroyAllWindows()
 			eh = cv2.equalizeHist(cell)
 			#th = np.sum(eh)/(eh.size*4)
 			ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
@@ -156,9 +157,9 @@ for i in range(1*cl, sudL-cl+1, cl):
 			xm = (np.min(X_) + np.max(X_))/2
 			rows,cols = img2.shape
 			img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
-			# cv2.imshow("image", img2)
-			# cv2.waitKey(0)
-			# cv2.destroyAllWindows()
+			cv2.imshow("image", img2)
+			cv2.waitKey(0)
+			cv2.destroyAllWindows()
 			neurons[0] = np.divide(img2[img2 > -1], 255.0)
 			neurons = feedforward(neurons, weights, biases)
 			# print(neurons[2])

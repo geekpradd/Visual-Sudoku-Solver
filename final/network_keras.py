@@ -19,7 +19,7 @@ inp = []
 out = []
 count = 0
 for i, o in train:
-    if len(inp) > 8000:
+    if len(inp) > 10000:
         break
     base_i = []
     base_o = []
@@ -62,7 +62,13 @@ out = np.asarray(out)
 test_inp = np.asarray(test_inp)
 test_out = np.asarray(test_out)
 
-model.fit(inp, out, epochs=30, batch_size=10)
+model.fit(inp, out, epochs=15, batch_size=10)
 
 _, accuracy = model.evaluate(test_inp, test_out)
 print ("Accuracy is " + str(accuracy))
+
+json = model.to_json()
+with open("model.json", "w") as f:
+    f.write(json)
+
+model.save_weights("model.h5")
