@@ -1,12 +1,12 @@
 import numpy as np 
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 
 from loader import load_data_wrapper
 
 train, valid, test = load_data_wrapper()
 
-def getModel():
+def getModelDense():
     model = Sequential()
 
     model.add(Dense(784, input_dim=784, activation='relu'))
@@ -16,6 +16,15 @@ def getModel():
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     return model 
+
+def getModelConv():
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2,2)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(Flatten())
 
 def train_network():
     inp = []
