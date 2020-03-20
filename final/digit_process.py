@@ -219,5 +219,5 @@ def test(src):
 
 
 if __name__ == "__main__":
-    print(test("a.png"))
+    print(get_matrix("sud6.jpg"))
     
