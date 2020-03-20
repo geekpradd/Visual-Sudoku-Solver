@@ -2,6 +2,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 from keras.datasets import mnist
 from keras.utils import to_categorical
+import os, numpy as np
+import cv2
 
 def getModelConv():
     model = Sequential()
@@ -30,16 +32,38 @@ def train():
     train_lab = to_categorical(train_lab)
     test_lab = to_categorical(test_lab)
 
+
     model.fit(train_im, train_lab, epochs=5, batch_size=60)
     _, test_ac = model.evaluate(test_im, test_lab)
 
+    print ("Finished MNIST Training")
     print ("Accuracy is " + str(test_ac))
 
+    files = os.listdir("test")
+    output = to_categorical([int(f.split('.')[0][-1:]) for f in files])
+
+    inp = []
+    for f in files:
+        src = "test/" + f
+        cell = cv2.imread(src)
+        cell = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
+        eq = cv2.equalizeHist(cell)
+        #th = np.sum(eh)/(eh.size*4)
+        ret, img = cv2.threshold(eq, 23, 255, cv2.THRESH_BINARY_INV)
+        img = cv2.resize(img, (28, 28))
+
+        img = img[..., np.newaxis]
+        inp.append(img)
+    inp = np.array(inp)
+
+
+    model.fit(inp, output, epochs=2, batch_size=27)
+
     json = model.to_json()
-    with open("modelconv.json", "w") as f:
+    with open("modelconv2.json", "w") as f:
         f.write(json)
 
-    model.save_weights("modelconv.h5")
+    model.save_weights("modelconv2.h5")
 
 if __name__ == "__main__":
     train()

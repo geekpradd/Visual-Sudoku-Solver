@@ -9,12 +9,12 @@ KERAS = True
 CONV = True 
 
 def load_conv():
-    f = open("modelconv.json", "r")
+    f = open("modelconv2.json", "r")
     json = f.read()
     f.close()
     model = model_from_json(json)
 
-    model.load_weights("modelconv.h5")
+    model.load_weights("modelconv2.h5")
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
     return model
