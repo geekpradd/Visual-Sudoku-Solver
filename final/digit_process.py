@@ -115,8 +115,8 @@ def get_matrix(src):
                 
                 eh = cv2.equalizeHist(cell)
                 #th = np.sum(eh)/(eh.size*4)
-                ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY)
-                img2 = cv2.resize(img2, (28, 28))
+                
+                img2 = cv2.resize(eh, (28, 28))
                 # cv2.imshow("image", img2)
                 # cv2.waitKey(0)
                 # cv2.destroyAllWindows()
@@ -147,13 +147,12 @@ def get_matrix(src):
                 rows,cols = img2.shape
                 img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
                 
-                
                 result_array = recognize(img2)
                 val = np.argmax(result_array)
-                print (val)
-                cv2.imshow("image", img2)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+                # print (val)
+                # cv2.imshow("image", img2)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
                 # neurons[0] = np.divide(img2[img2 > -1], 255.0)
                 # neurons = feedforward(neurons, weights, biases)
                 # # print(neurons[2])
@@ -205,10 +204,10 @@ def test(src):
     
     result_array = recognize(img2)
     val = np.argmax(result_array)
-    print (val)
-    cv2.imshow("image", img2)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # print (val)
+    # cv2.imshow("image", img2)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     # neurons[0] = np.divide(img2[img2 > -1], 255.0)
     # neurons = feedforward(neurons, weights, biases)
     # # print(neurons[digits[int(i/cl)][int(j/cl)] = val2])
@@ -220,5 +219,5 @@ def test(src):
 
 
 if __name__ == "__main__":
-    print(get_matrix("sud.jpg"))
+    print(test("a.png"))
     

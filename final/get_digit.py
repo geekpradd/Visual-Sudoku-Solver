@@ -1,9 +1,11 @@
 import numpy as np
 from keras.models import Sequential, model_from_json
+from neuralnet_crossentropy import Network
 from loader import load_data_wrapper
 
 import cv2 
 
+KERAS = False 
 def load_model():
     f = open("model.json", "r")
     json = f.read()
@@ -46,8 +48,18 @@ def load_model():
 
 def recognize(img):
     inp = np.array([np.divide(img[img > -1], 255.0)])
-    model = load_model()
-    res = model.predict(inp)[0]
+    ar = []
+    for elem in inp[0]:
+        ar.append([elem])
+    ar = np.array(ar)
+
+    
+    if KERAS:
+        model = load_model()
+        res = model.predict(inp)[0]
+    else:
+        net = Network([784, 30, 10])
+        res = net.forward(ar)
     
     return res
 
