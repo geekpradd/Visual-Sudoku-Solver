@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np 
 import random
 
-LOAD = True
+LOAD = False
 
 # add L2 regularization
 
@@ -63,8 +63,6 @@ class Network(object):
         success = 0
         total = 0
         while i<=r:
-            if (i==l):
-                print (test_data[i][0])
             result = self.forward(test_data[i][0])
             best_val = 0
             best = -1

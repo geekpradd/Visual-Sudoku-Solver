@@ -1,8 +1,17 @@
-from neuralnet_crossentropy import *
-from loader import *
+from digit_process import test
+import os 
 
-net = Network([784, 30, 10])
-train, valid, dest = load_data_wrapper()
+files = os.listdir("test")
 
-net.gradient_descent(train, 30, 10, 3.0, 0.001)
-net.test(dest, 1, 5000)
+total = 0
+hits = 0
+
+for f in files:
+    result = test("test/" + f)
+    total+=1
+    if (result == int(f.split('.')[0][-1:])):
+        hits += 1
+
+    print("Got {0} Was {1}".format(result, f.split('.')[0][-1:]))
+
+print ("Hits {0} Total {1}".format(hits, total))
