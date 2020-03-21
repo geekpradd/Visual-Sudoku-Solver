@@ -174,46 +174,9 @@ def test(src):
     ret, img2 = cv2.threshold(eh, 23, 255, cv2.THRESH_BINARY_INV)
     img2 = cv2.resize(img2, (28, 28))
     
-    # ar = 0
-    # y_m = 0
-    # x_m = 0
-    # for y in range(img2.shape[0]):
-    #     for x in range(img2.shape[1]):
-    #         if img2[y][x] == 255:
-    #             img2, num = fillCol(img2, y, x, 17, 255)
-    #             if num > ar:
-    #                 ar = num
-    #                 y_m = y
-    #                 x_m = x
-
-    # img2, num_ = fillCol(img2, y_m, x_m, 255, 17)
-    # for y in range(img2.shape[0]):
-    #     for x in range(img2.shape[1]):
-    #         if img2[y][x] == 17:
-    #             img2, num = fillCol(img2, y, x, 0, 17)
-
-    # ret, img3 = cv2.threshold(img2, 200, 255, cv2.THRESH_BINARY)
-    # pps = np.nonzero(img3)
-    # X_ = pps[1]
-    # Y_ = pps[0]
-    # ym = (np.min(Y_) + np.max(Y_))/2
-    # xm = (np.min(X_) + np.max(X_))/2
-    # rows,cols = img2.shape
-    # img2 = shiftImage(img2, int(rows/2-ym), int(cols/2-xm))
-    
     
     result_array = recognize(img2)
     val = np.argmax(result_array)
-    # print (val)
-    # cv2.imshow("image", img2)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # neurons[0] = np.divide(img2[img2 > -1], 255.0)
-    # neurons = feedforward(neurons, weights, biases)
-    # # print(neurons[digits[int(i/cl)][int(j/cl)] = val2])
-    # # cv2.imshow("image", img2)
-    # # cv2.waitKey(0)
-    # # cv2.destroyAllWindows()
     return val
 
 
