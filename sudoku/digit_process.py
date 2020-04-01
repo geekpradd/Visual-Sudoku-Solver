@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from get_digit import recognize
+from .get_digit import recognize
 
 def fillCol(img, c_i, c_j, col, curCol):
 	# run dfs and fill color

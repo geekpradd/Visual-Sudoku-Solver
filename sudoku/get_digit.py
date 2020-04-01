@@ -1,29 +1,29 @@
 import numpy as np
 from keras.models import Sequential, model_from_json
-from neuralnet_crossentropy import Network
-import cv2 
+import cv2, os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 KERAS = True 
 CONV = True 
 
 def load_conv():
-    f = open("modelconv2.json", "r")
+    f = open(dir_path + "/models/modelconv2.json", "r")
     json = f.read()
     f.close()
     model = model_from_json(json)
 
-    model.load_weights("modelconv2.h5")
+    model.load_weights(dir_path + "/models/modelconv2.h5")
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
     return model
 
 def load_model():
-    f = open("model.json", "r")
+    f = open(dir_path + "/models/model.json", "r")
     json = f.read()
     f.close()
     model = model_from_json(json)
 
-    model.load_weights("model.h5")
+    model.load_weights(dir_path + "/models/model.h5")
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     return model
@@ -43,9 +43,6 @@ def recognize(img):
     elif KERAS:
         model = load_model()
         res = model.predict(inp)[0]
-    else:
-        net = Network([784, 30, 10])
-        res = net.forward(ar)
     
     return res
 
