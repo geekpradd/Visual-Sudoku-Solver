@@ -1,7 +1,8 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, send_from_directory
+from flask import Flask, flash, request, redirect, url_for, send_from_directory, render_template, jsonify
+import json
 from werkzeug.utils import secure_filename
-from sudoku import solve_sudoku
+from sudoku import image_to_matrix, solve_sudoku
 
 UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -16,13 +17,10 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
@@ -31,27 +29,19 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+    return render_template('home.html')
 
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    print ("location is " + str(UPLOAD_FOLDER + filename))
-    matrix = solve_sudoku(UPLOAD_FOLDER + filename)
-    return '''
-    <!doctype html>
-    <title>Matrix</title>
-    <h1>sudoku is</h1>
-    {0}
-    </form>
-    '''.format(str(matrix))
+    matrix = image_to_matrix(UPLOAD_FOLDER + filename)
+    matrix_normal = [ls.tolist() for ls in matrix]
+    print ("Got " + json.dumps(matrix_normal))
+    return render_template('sudoku.html', matrix=json.dumps(matrix_normal))
 
+@app.route('/solve', methods=['GET'])
+def solve():
+    string = request.args.get('matrix')
+    print ("got " + string)
+    return jsonify(solve_sudoku(string))
 app.run(threaded=False)

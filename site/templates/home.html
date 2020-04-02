@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+      <p>
+        Upload your scanned sudoku image
+      </p>
+      <center>
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file> <br><br>
+            <input type=submit value=Upload class="btn btn-primary">
+        </form>
+        </center>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block header %}
+
+<div class="overlay"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+      <div class="site-heading">
+        <h1>Visual Sudoku Solver</h1>
+        <span class="subheading"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+{% endblock %}

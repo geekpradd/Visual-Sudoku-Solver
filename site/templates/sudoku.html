@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+      <p>
+        Your scanned sudoku after image recogintion is given below. Please edit for any inconsistencies 
+        as our accuracy is not 100% before clicking on solve to solve it:
+      </p>
+      <div class="container" id="grid-root">
+      
+        </div>
+
+        <br>
+        <br>
+        <center>
+            <button class="btn btn-primary" id="solveButton">Solve Sudoku</button>
+        </center>
+        <br>
+        <br>
+    </div>
+  </div>
+</div>
+<script>
+var matrix = {{matrix}};
+</script>
+<script src = "{{ url_for('static', filename='js/sudoku.js') }}"></script>
+{% endblock %}
+
+{% block header %}
+
+<div class="overlay"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+      <div class="site-heading">
+        <h1>Visual Sudoku Solver</h1>
+        <span class="subheading"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+{% endblock %}
