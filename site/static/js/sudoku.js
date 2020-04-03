@@ -49,18 +49,28 @@ const setTilesSize = () => {
     }
     console.log(final_sudoku);
     console.log(final_string);
-    $.get("/solve", {
+    $.post("/solve", {
         matrix: final_string
     },
     function(data, status){
-        matrix = (data);
-        console.log(matrix);
-        updateGrid(); 
+        matrix_temp = (data);
+        console.log(matrix_temp);
+        if (matrix_temp[0][0] === 0){
+          console.log("okay");
+          alert("Please check the sudoku as it is not solvable in the current state");
+        }
+        else {
+          matrix = matrix_temp;
+          updateGrid(); 
+          alert("Sudoku has been solved");
+        }
+        
     }
     );
   };
 
   const updateGrid = () => {
+    
     for (let y = 0; y < 9; y++) {
         for (let x = 0; x < 9; x++) {
             const tile = document.getElementById(y + '--' + x);

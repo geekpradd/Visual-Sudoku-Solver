@@ -36,12 +36,10 @@ def upload_file():
 def uploaded_file(filename):
     matrix = image_to_matrix(UPLOAD_FOLDER + filename)
     matrix_normal = [ls.tolist() for ls in matrix]
-    print ("Got " + json.dumps(matrix_normal))
     return render_template('sudoku.html', matrix=json.dumps(matrix_normal))
 
-@app.route('/solve', methods=['GET'])
+@app.route('/solve', methods=['POST'])
 def solve():
-    string = request.args.get('matrix')
-    print ("got " + string)
+    string = request.form['matrix']
     return jsonify(solve_sudoku(string))
 app.run(threaded=False)
